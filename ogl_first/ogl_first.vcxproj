@@ -24,6 +24,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="glfw3.dll" />
+    <None Include="src\shaders\frgone.frag" />
+    <None Include="src\shaders\vrtxone.vert" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
