@@ -7,6 +7,8 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <ctime>
+#include <cstdlib>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
@@ -31,6 +33,7 @@ const char* readShaderFileGLSL(const char* shaderFile);
 
 
 int main() {
+	srand(time(0));
 	// ---------------------------------------- start window initialization ----------------------------------------
 	std::cout << "Initializing OpenGL application ..." << std::endl;
 	glfwInit();
@@ -112,9 +115,9 @@ int main() {
 	// ---------------------------------------- end shader program initialization ----------------------------------------
 	// ---------------------------------------- start render initialization ----------------------------------------
 	float vertices[] = {
-		// positions
-		0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, // top right
-		-0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f, // bottom right
+		// positions       // colors
+		0.5f, 0.5f, 0.0f,  1.0f, 0.0f, 0.0f, // top right
+	   -0.5f, 0.5f, 0.0f,  0.0f, 1.0f, 0.0f, // bottom right
 		0.0f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f // bottom left
 	};
 	// vertex buffer object
@@ -143,20 +146,38 @@ int main() {
 	// render loop
 	float timeValue = glfwGetTime();
 	float ofStValue = (sin(timeValue) / 2.0f) + 0.5f;
+	float triangleLocation = 0.0f;
+	bool triangleDirection = true;
 	int vertexColorLocation = glGetUniformLocation(shaderProgram, "ofstclr");
+	int vertexAposXLocation = glGetUniformLocation(shaderProgram, "positionModifier");
 	while (!glfwWindowShouldClose(window)) {
 		// calculate FPS
 		calculateFPS(window);
 		// inputs
 		processInput(window);
 		// rendering
-		glClearColor(0.6f, 0.3f, 0.3f, 1.0f);
+		// make background color random
+		glClearColor(static_cast <float> (rand()) / static_cast <float> (RAND_MAX), static_cast <float> (rand()) / static_cast <float> (RAND_MAX), static_cast <float> (rand()) / static_cast <float> (RAND_MAX), 1.0);
 		glClear(GL_COLOR_BUFFER_BIT);
 		glUseProgram(shaderProgram);
 		timeValue = glfwGetTime();
 		ofStValue = (sin(timeValue) / 2.0f) + 0.5f;
+		if (triangleLocation >= 0.5f) {
+			triangleDirection = false;
+		}
+		else if (triangleLocation <= -0.5f) {
+			triangleDirection = true;
+		}
+		if (triangleDirection) {
+			triangleLocation += 0.003f;
+		}
+		else {
+			triangleLocation -= 0.003f;
+		}
 		vertexColorLocation = glGetUniformLocation(shaderProgram, "ofstclr");
+		vertexAposXLocation = glGetUniformLocation(shaderProgram, "positionModifier");
 		glUniform3f(vertexColorLocation, ofStValue, ofStValue, ofStValue);
+		glUniform1f(vertexAposXLocation, triangleLocation);
 		// render the triangle
 		glBindVertexArray(VAO);
 		glDrawArrays(GL_TRIANGLES, 0, 3);
